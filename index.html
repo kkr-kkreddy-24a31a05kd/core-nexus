@@ -1,0 +1,387 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KKR Core-Nexus | Consumer Ethos Engine v2026</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=JetBrains+Mono&display=swap');
+        
+        :root {
+            --nexus-primary: #8b5cf6;
+            --nexus-glow: rgba(139, 92, 246, 0.3);
+            --accent-color: #a78bfa;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: radial-gradient(circle at 50% 50%, #0a0a1a 0%, #020205 100%);
+            color: #f1f5f9;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        .glass-panel {
+            background: rgba(15, 15, 30, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8);
+        }
+
+        .glow-border {
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid var(--nexus-glow);
+            box-shadow: 0 0 20px var(--nexus-glow);
+        }
+
+        .mono { font-family: 'JetBrains Mono', monospace; }
+
+        /* Animation for the "Neural" scanning effect */
+        .scan-line {
+            position: absolute;
+            height: 1px;
+            width: 100%;
+            background: linear-gradient(90deg, transparent, var(--accent-color), transparent);
+            top: 0;
+            left: 0;
+            animation: scanMove 4s linear infinite;
+            opacity: 0.2;
+            pointer-events: none;
+        }
+
+        @keyframes scanMove {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(400px); }
+        }
+
+        .pulse-dot {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.95); opacity: 0.5; }
+            70% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(0.95); opacity: 0.5; }
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <!-- Brand HUD -->
+    <nav class="max-w-7xl mx-auto mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div class="flex items-center gap-4">
+            <div class="p-3 bg-violet-600 rounded-2xl shadow-lg shadow-violet-500/20">
+                <i data-lucide="brain-circuit" class="text-white w-8 h-8"></i>
+            </div>
+            <div>
+                <h1 class="text-2xl font-black tracking-tighter uppercase italic">Core-Nexus <span class="text-violet-400 not-italic">v2026</span></h1>
+                <div class="flex items-center gap-2 text-[10px] mono text-violet-300/60 tracking-widest">
+                    <span class="w-2 h-2 bg-emerald-500 rounded-full pulse-dot"></span>
+                    ETHOS ENGINE ACTIVE // HYBRID-AI CORE
+                </div>
+            </div>
+        </div>
+        
+        <div class="flex gap-4 items-center">
+            <div class="hidden sm:block text-right">
+                <div class="text-[10px] mono text-slate-500 uppercase tracking-widest">Edge Latency</div>
+                <div id="latency-val" class="text-emerald-400 font-bold mono">-- ms</div>
+            </div>
+            <div class="h-10 w-[1px] bg-white/10 mx-2 hidden sm:block"></div>
+            <div class="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-xs font-bold flex items-center gap-2">
+                <i data-lucide="cpu" class="w-4 h-4 text-violet-400"></i>
+                QUANTIZED FP16
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- Analysis Input -->
+        <div class="lg:col-span-7 space-y-6">
+            <div id="input-container" class="glass-panel rounded-[2.5rem] p-8 relative overflow-hidden glow-border">
+                <div class="scan-line"></div>
+                <div class="flex justify-between items-center mb-6">
+                    <label class="text-[11px] font-black uppercase tracking-[0.2em] text-slate-500 flex items-center gap-2">
+                        <i data-lucide="message-square" class="w-3 h-3"></i> Consumer Signal Input
+                    </label>
+                    <div id="status-badge" class="px-3 py-1 rounded-full bg-slate-800 text-[10px] font-bold text-slate-400 border border-white/5">
+                        LISTENING
+                    </div>
+                </div>
+
+                <textarea 
+                    id="user-input"
+                    class="w-full h-48 bg-transparent text-xl font-light focus:outline-none placeholder:text-slate-700 resize-none leading-relaxed border-none focus:ring-0"
+                    placeholder="Paste customer reviews, feedback, or social mentions here for real-time ethos mapping..."
+                ></textarea>
+
+                <div class="mt-8 pt-8 border-t border-white/5 grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="p-4 rounded-2xl bg-white/5 border border-white/5">
+                        <div class="text-[9px] text-slate-500 uppercase font-black mb-1">Intent</div>
+                        <div id="stat-intent" class="text-sm font-bold mono text-slate-300 uppercase">Idle</div>
+                    </div>
+                    <div class="p-4 rounded-2xl bg-white/5 border border-white/5">
+                        <div class="text-[9px] text-slate-500 uppercase font-black mb-1">Sentiment</div>
+                        <div id="stat-sentiment" class="text-sm font-bold mono text-slate-300">0.00</div>
+                    </div>
+                    <div class="p-4 rounded-2xl bg-white/5 border border-white/5">
+                        <div class="text-[9px] text-slate-500 uppercase font-black mb-1">Confidence</div>
+                        <div id="stat-conf" class="text-sm font-bold mono text-slate-300">0%</div>
+                    </div>
+                    <div class="p-4 rounded-2xl bg-white/5 border border-white/5">
+                        <div class="text-[9px] text-slate-500 uppercase font-black mb-1">Risk Factor</div>
+                        <div id="stat-risk" class="text-sm font-bold mono text-emerald-400">Stable</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contextual Strategy -->
+            <div class="glass-panel rounded-3xl p-6 border border-white/5 relative group">
+                <h3 class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-4 flex items-center gap-2">
+                    <i data-lucide="zap" class="w-3 h-3"></i> Recommended UX Intervention
+                </h3>
+                <div id="intervention-box" class="text-slate-400 text-sm leading-relaxed italic">
+                    Waiting for signal patterns to calculate optimized consumer response...
+                </div>
+                <div class="absolute bottom-4 right-6 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button class="text-[10px] font-bold text-violet-400 flex items-center gap-1 hover:underline">
+                        EXECUTE API HOOK <i data-lucide="chevron-right" class="w-3 h-3"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3D Visualization -->
+        <div class="lg:col-span-5 space-y-6">
+            <div class="glass-panel rounded-[2.5rem] p-6 h-full min-h-[500px] flex flex-col">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-[11px] font-black uppercase tracking-[0.2em] text-slate-500">Ethos Manifold 3D</h3>
+                    <div class="flex gap-2">
+                        <div class="w-2 h-2 rounded-full bg-red-500"></div>
+                        <div class="w-2 h-2 rounded-full bg-emerald-500"></div>
+                        <div class="w-2 h-2 rounded-full bg-blue-500"></div>
+                    </div>
+                </div>
+
+                <div id="three-container" class="flex-grow rounded-3xl bg-black/30 overflow-hidden relative border border-white/5 shadow-inner">
+                    <!-- Three.js Scene -->
+                </div>
+
+                <div class="mt-6 space-y-5">
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-[10px] mono">
+                            <span class="text-slate-400">BEHAVIORAL URGENCY</span>
+                            <span id="label-urgency" class="text-slate-500">20%</span>
+                        </div>
+                        <div class="h-1 bg-white/5 rounded-full overflow-hidden">
+                            <div id="bar-urgency" class="h-full bg-gradient-to-r from-violet-600 to-indigo-400 transition-all duration-700" style="width: 20%"></div>
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-[10px] mono">
+                            <span class="text-slate-400">BRAND TRUST INDEX</span>
+                            <span id="label-trust" class="text-slate-500">50%</span>
+                        </div>
+                        <div class="h-1 bg-white/5 rounded-full overflow-hidden">
+                            <div id="bar-trust" class="h-full bg-gradient-to-r from-emerald-600 to-teal-400 transition-all duration-700" style="width: 50%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // --- Core Engine Configuration ---
+        const ENGINE_CONFIG = {
+            THRESHOLD_CHURN: 0.25,
+            THRESHOLD_BUY: 0.70,
+            PRIMARY_COLOR: 0x8b5cf6,
+            CHURN_COLOR: 0xef4444,
+            BUY_COLOR: 0x10b981,
+            HESITANT_COLOR: 0xf59e0b
+        };
+
+        // --- 3D Visualization Controller ---
+        let scene, camera, renderer, crystal, wireframe, particles;
+        const container = document.getElementById('three-container');
+
+        function init3D() {
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            container.appendChild(renderer.domElement);
+
+            // Create "Ethos Core" Geometry
+            const geometry = new THREE.IcosahedronGeometry(2, 0);
+            const material = new THREE.MeshPhongMaterial({ 
+                color: ENGINE_CONFIG.PRIMARY_COLOR, 
+                flatShading: true,
+                shininess: 100,
+                transparent: true,
+                opacity: 0.8
+            });
+            crystal = new THREE.Mesh(geometry, material);
+            scene.add(crystal);
+
+            // Wireframe Overlay
+            const wireMat = new THREE.MeshBasicMaterial({ color: 0xffffff, wireframe: true, transparent: true, opacity: 0.1 });
+            wireframe = new THREE.Mesh(geometry, wireMat);
+            wireframe.scale.set(1.05, 1.05, 1.05);
+            scene.add(wireframe);
+
+            // Particle Field
+            const partGeom = new THREE.BufferGeometry();
+            const partCount = 200;
+            const coords = new Float32Array(partCount * 3);
+            for(let i=0; i<partCount * 3; i++) coords[i] = (Math.random() - 0.5) * 10;
+            partGeom.setAttribute('position', new THREE.BufferAttribute(coords, 3));
+            particles = new THREE.Points(partGeom, new THREE.PointsMaterial({ color: 0x8b5cf6, size: 0.05 }));
+            scene.add(particles);
+
+            const light = new THREE.DirectionalLight(0xffffff, 1);
+            light.position.set(5, 5, 5);
+            scene.add(light);
+            scene.add(new THREE.AmbientLight(0x202020));
+
+            camera.position.z = 6;
+
+            function animate() {
+                requestAnimationFrame(animate);
+                crystal.rotation.y += 0.005;
+                crystal.rotation.z += 0.002;
+                wireframe.rotation.y -= 0.003;
+                particles.rotation.y += 0.001;
+                renderer.render(scene, camera);
+            }
+            animate();
+        }
+
+        // --- Hybrid AI Predictor Logic ---
+        const EthosAnalyzer = {
+            dictionary: {
+                purchase: ['order', 'buy', 'price', 'cart', 'discount', 'checkout', 'pay', 'ship', 'deal'],
+                hesitant: ['maybe', 'if', 'review', 'think', 'compare', 'better', 'expensive', 'wait'],
+                loyal: ['love', 'best', 'always', 'great', 'excellent', 'perfect', 'recommend', 'favorite'],
+                churn: ['hate', 'worst', 'bad', 'broken', 'never', 'cancel', 'terrible', 'rude', 'awful', 'refund']
+            },
+
+            analyze: function(text) {
+                const startTime = performance.now();
+                const cleanText = text.toLowerCase().replace(/[^\w\s]/gi, '');
+                const words = cleanText.split(/\s+/).filter(w => w.length > 2);
+                
+                if (words.length === 0) return this.getEmptyState();
+
+                // 1. Contextual Transformer Simulation (Attentional weight)
+                let sentimentScore = 0.5;
+                let intentScore = 0.5;
+
+                words.forEach(word => {
+                    if (this.dictionary.loyal.includes(word)) sentimentScore += 0.12;
+                    if (this.dictionary.churn.includes(word)) sentimentScore -= 0.18;
+                    if (this.dictionary.purchase.includes(word)) intentScore += 0.15;
+                    if (this.dictionary.hesitant.includes(word)) intentScore -= 0.1;
+                });
+
+                // Clamp values 0.0 to 1.0
+                sentimentScore = Math.max(0, Math.min(1, sentimentScore));
+                intentScore = Math.max(0, Math.min(1, intentScore));
+
+                // 2. Random Forest Simulation (Decision Path)
+                let state = "Neutral";
+                let risk = "Stable";
+                let color = ENGINE_CONFIG.PRIMARY_COLOR;
+                let strategy = "Maintain standard engagement pipeline.";
+
+                if (sentimentScore < ENGINE_CONFIG.THRESHOLD_CHURN) {
+                    state = "High Risk Churner";
+                    risk = "CRITICAL";
+                    color = ENGINE_CONFIG.CHURN_COLOR;
+                    strategy = "ALERT: High churn detected. Auto-generate concierge support ticket and 20% retention credit.";
+                } else if (intentScore > ENGINE_CONFIG.THRESHOLD_BUY) {
+                    state = "Ready to Buy";
+                    risk = "Zero (High Lead)";
+                    color = ENGINE_CONFIG.BUY_COLOR;
+                    strategy = "CONVERSION: Consumer is in 'Ready to Buy' state. Trigger flash-sale countdown and one-click checkout.";
+                } else if (intentScore < 0.4 && sentimentScore > 0.6) {
+                    state = "Hesitant Browser";
+                    risk = "Low (Nurture)";
+                    color = ENGINE_CONFIG.HESITANT_COLOR;
+                    strategy = "NURTURE: Display 'Comparison Guides' and 'Social Proof' to build purchasing confidence.";
+                }
+
+                const endTime = performance.now();
+                return {
+                    sentiment: sentimentScore,
+                    intent: intentScore,
+                    state,
+                    risk,
+                    color,
+                    strategy,
+                    latency: (endTime - startTime).toFixed(2),
+                    confidence: Math.round(75 + (words.length * 2))
+                };
+            },
+
+            getEmptyState: function() {
+                return { sentiment: 0, intent: 0, state: "Idle", risk: "Stable", color: ENGINE_CONFIG.PRIMARY_COLOR, strategy: "Waiting for signal patterns...", latency: "0.00", confidence: 0 };
+            }
+        };
+
+        // --- DOM Logic ---
+        const input = document.getElementById('user-input');
+        const containerUI = document.getElementById('input-container');
+
+        function refreshUI(e) {
+            const result = EthosAnalyzer.analyze(e.target.value);
+            
+            // Stats
+            document.getElementById('stat-intent').innerText = result.state;
+            document.getElementById('stat-sentiment').innerText = result.sentiment.toFixed(2);
+            document.getElementById('stat-conf').innerText = `${result.confidence}%`;
+            document.getElementById('stat-risk').innerText = result.risk;
+            document.getElementById('latency-val').innerText = `${result.latency} ms`;
+            document.getElementById('intervention-box').innerText = result.strategy;
+
+            // Visual Updates
+            containerUI.style.setProperty('--nexus-glow', `rgba(${(result.color >> 16) & 255}, ${(result.color >> 8) & 255}, ${result.color & 255}, 0.3)`);
+            
+            document.getElementById('label-urgency').innerText = `${Math.round(result.intent * 100)}%`;
+            document.getElementById('bar-urgency').style.width = `${result.intent * 100}%`;
+            document.getElementById('label-trust').innerText = `${Math.round(result.sentiment * 100)}%`;
+            document.getElementById('bar-trust').style.width = `${result.sentiment * 100}%`;
+
+            // 3D Response
+            crystal.material.color.setHex(result.color);
+            const scale = 0.5 + (result.intent * 1.5);
+            crystal.scale.set(scale, scale, scale);
+            particles.material.color.setHex(result.color);
+
+            // Risk color styling
+            const riskEl = document.getElementById('stat-risk');
+            if(result.risk === 'CRITICAL') riskEl.className = "text-sm font-bold mono text-red-400";
+            else if(result.risk.includes('High')) riskEl.className = "text-sm font-bold mono text-emerald-400";
+            else riskEl.className = "text-sm font-bold mono text-slate-300";
+        }
+
+        window.onload = () => {
+            lucide.createIcons();
+            init3D();
+            input.addEventListener('input', refreshUI);
+        };
+
+        window.addEventListener('resize', () => {
+            camera.aspect = container.clientWidth / container.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+        });
+    </script>
+</body>
+</html>
